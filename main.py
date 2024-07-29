@@ -5,27 +5,30 @@ TOKEN = "hkKdfhdasiHlg931tyaw412s"  # Personalized Token (Personal)
 
 pixela_endpoint = "https://pixe.la/v1/users"
 
-# Setting up New Account
+# Parameters for setting up a new account
 user_params = {
     "token": TOKEN,
     "username": USERNAME,
-    "agreeTermsOfService": "yes",
-    "notMinor": "yes",
+    "agreeTermsOfService": "yes",  # Agreement to the terms of service
+    "notMinor": "yes",  # Confirmation that the user is not a minor
 }
 
-# response = requests.post(url=pixela_endpoint,json=user_params)
+# response = requests.post(url=pixela_endpoint, json=user_params)
 # print(response.text)
 
+# Define the endpoint for creating a new graph
 graph_endpoint = f"{pixela_endpoint}/{USERNAME}/graphs"
 
+# Configuration for the new graph
 graph_config = {
-    "id": "graph1",
-    "name": "Jogging Graph",
-    "unit": "Km",
-    "type": "float",
-    "color": "sora"
+    "id": "graph1",  # Unique identifier for the graph
+    "name": "Jogging Graph",  # Name of the graph
+    "unit": "Km",  # Unit of measurement
+    "type": "float",  # Data type (float for decimal numbers)
+    "color": "sora"  # Color of the graph
 }
 
+# Headers for the request, including the authentication token
 headers = {
     "X-USER-TOKEN": TOKEN
 }
