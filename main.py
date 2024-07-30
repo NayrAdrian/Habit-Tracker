@@ -1,65 +1,106 @@
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import ttk
+from ttkthemes import ThemedTk
+import webbrowser
 import requests
-from datetime import datetime
 
-USERNAME = "nayradrian"  # Chosen Username
-TOKEN = "hkKdfhdasiHlg931tyaw412s"  # Personalized Token (Personal)
+# Constants
+USERNAME = "nayradrian"
+TOKEN = "hkKdfhdasiHlg931tyaw412s"
 GRAPH_ID = "graph1"
-pixela_endpoint = "https://pixe.la/v1/users"
+PIXELA_ENDPOINT = "https://pixe.la/v1/users"
+HEADERS = {"X-USER-TOKEN": TOKEN}
+GRAPH_URL = f"https://pixe.la/v1/users/{USERNAME}/graphs/{GRAPH_ID}.html"
 
-# Parameters for setting up a new account
-user_params = {
-    "token": TOKEN,
-    "username": USERNAME,
-    "agreeTermsOfService": "yes",  # Agreement to the terms of service
-    "notMinor": "yes",  # Confirmation that the user is not a minor
-}
 
-# response = requests.post(url=pixela_endpoint, json=user_params)
-# print(response.text)
+class PixelaApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title(f"{USERNAME}'s Tracker")
 
-# Define the endpoint for creating a new graph
-graph_endpoint = f"{pixela_endpoint}/{USERNAME}/graphs"
+        # Title header
+        self.title_label = ttk.Label(self.root, text="Jogging Tracker", font=("Helvetica", 18, "bold"))
+        self.title_label.pack(pady=10)
 
-# Configuration for the new graph
-graph_config = {
-    "id": "graph1",  # Unique identifier for the graph
-    "name": "Jogging Graph",  # Name of the graph
-    "unit": "Km",  # Unit of measurement
-    "type": "float",  # Data type (float for decimal numbers)
-    "color": "sora"  # Color of the graph
-}
+        # Graph link
+        self.graph_link = ttk.Label(self.root, text="View Graph", foreground="blue", cursor="hand2",
+                                    font=("Helvetica", 14))
+        self.graph_link.pack()
+        self.graph_link.bind("<Button-1>", self.open_graph_link)
 
-# Headers for the request, including the authentication token
-headers = {
-    "X-USER-TOKEN": TOKEN
-}
+        # Add section
+        self.add_frame = ttk.LabelFrame(self.root, text="Add Pixel")
+        self.add_frame.pack(pady=10, padx=10, fill="both", expand="yes")
 
-# response = requests.post(url=graph_endpoint, json=graph_config, headers=headers)
-# print(response.text)
+        self.date_label = ttk.Label(self.add_frame, text="Date (YYYYMMDD):")
+        self.date_label.grid(row=0, column=0, padx=5, pady=5)
+        self.date_entry = ttk.Entry(self.add_frame)
+        self.date_entry.grid(row=0, column=1, padx=5, pady=5)
 
-pixel_creation_endpoint = f"{pixela_endpoint}/{USERNAME}/graphs/{GRAPH_ID}"
+        self.quantity_label = ttk.Label(self.add_frame, text="Distance:")
+        self.quantity_label.grid(row=1, column=0, padx=5, pady=5)
+        self.quantity_entry = ttk.Entry(self.add_frame)
+        self.quantity_entry.grid(row=1, column=1, padx=5, pady=5)
 
-# today = datetime.now()
-today = datetime(year=2024, month=7, day=27)
+        self.add_button = ttk.Button(self.add_frame, text="Add", command=self.add_pixel)
+        self.add_button.grid(row=2, columnspan=2, pady=10)
 
-pixel_data = {
-    "date": today.strftime("%Y%m%d"),
-    "quantity": "5.1",
-}
+        # Update section
+        self.update_frame = ttk.LabelFrame(self.root, text="Update Pixel")
+        self.update_frame.pack(pady=10, padx=10, fill="both", expand="yes")
 
-response = requests.post(url=pixel_creation_endpoint, json=pixel_data, headers=headers)
-print(response.text)
+        self.update_date_label = ttk.Label(self.update_frame, text="Date (YYYYMMDD):")
+        self.update_date_label.grid(row=0, column=0, padx=5, pady=5)
+        self.update_date_entry = ttk.Entry(self.update_frame)
+        self.update_date_entry.grid(row=0, column=1, padx=5, pady=5)
 
-update_endpoint = f"{pixela_endpoint}/{USERNAME}/graphs/{GRAPH_ID}/{today.strftime('%Y%m%d')}"
+        self.new_quantity_label = ttk.Label(self.update_frame, text="New Distance:")
+        self.new_quantity_label.grid(row=1, column=0, padx=5, pady=5)
+        self.new_quantity_entry = ttk.Entry(self.update_frame)
+        self.new_quantity_entry.grid(row=1, column=1, padx=5, pady=5)
 
-new_pixel_data = {
-    "quantity": "2.5"
-}
+        self.update_button = ttk.Button(self.update_frame, text="Update", command=self.update_pixel)
+        self.update_button.grid(row=2, columnspan=2, pady=10)
 
-# response = requests.put(url=update_endpoint, json=new_pixel_data, headers=headers)
-# print(response.text)
+        # Delete section
+        self.delete_frame = ttk.LabelFrame(self.root, text="Delete Pixel")
+        self.delete_frame.pack(pady=10, padx=10, fill="both", expand="yes")
 
-delete_endpoint = f"{pixela_endpoint}/{USERNAME}/graphs/{GRAPH_ID}/{today.strftime('%Y%m%d')}"
+        self.delete_date_label = ttk.Label(self.delete_frame, text="Date (YYYYMMDD):")
+        self.delete_date_label.grid(row=0, column=0, padx=5, pady=5)
+        self.delete_date_entry = ttk.Entry(self.delete_frame)
+        self.delete_date_entry.grid(row=0, column=1, padx=5, pady=5)
 
-# response = requests.delete(url=delete_endpoint, headers=headers)
-# print(response.text)
+        self.delete_button = ttk.Button(self.delete_frame, text="Delete", command=self.delete_pixel)
+        self.delete_button.grid(row=1, columnspan=2, pady=10)
+
+    def open_graph_link(self, event):
+        webbrowser.open(GRAPH_URL)
+
+    def add_pixel(self):
+        date = self.date_entry.get()
+        quantity = self.quantity_entry.get()
+        pixel_data = {"date": date, "quantity": quantity}
+        response = requests.post(url=f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}", json=pixel_data,
+                                 headers=HEADERS)
+        messagebox.showinfo("Add Pixel", response.text)
+
+    def update_pixel(self):
+        date = self.update_date_entry.get()
+        new_quantity = self.new_quantity_entry.get()
+        update_data = {"quantity": new_quantity}
+        response = requests.put(url=f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}/{date}", json=update_data,
+                                headers=HEADERS)
+        messagebox.showinfo("Update Pixel", response.text)
+
+    def delete_pixel(self):
+        date = self.delete_date_entry.get()
+        response = requests.delete(url=f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}/{date}", headers=HEADERS)
+        messagebox.showinfo("Delete Pixel", response.text)
+
+
+# Main
+root = ThemedTk(theme="breeze")
+app = PixelaApp(root)
+root.mainloop()
