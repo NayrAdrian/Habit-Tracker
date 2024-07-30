@@ -4,6 +4,7 @@ from tkinter import ttk
 from ttkthemes import ThemedTk
 import webbrowser
 import requests
+from datetime import datetime
 
 # Constants
 USERNAME = "nayradrian"
@@ -78,8 +79,19 @@ class PixelaApp:
     def open_graph_link(self, event):
         webbrowser.open(GRAPH_URL)
 
+    def validate_date(self, date_text):
+        try:
+            datetime.strptime(date_text, '%Y%m%d')
+            return True
+        except ValueError:
+            return False
+
     def add_pixel(self):
         date = self.date_entry.get()
+        if not self.validate_date(date):
+            messagebox.showerror("Invalid Date", "Please enter a valid date in YYYYMMDD format.")
+            return
+
         quantity = self.quantity_entry.get()
         pixel_data = {"date": date, "quantity": quantity}
         response = requests.post(url=f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}", json=pixel_data,
@@ -88,6 +100,10 @@ class PixelaApp:
 
     def update_pixel(self):
         date = self.update_date_entry.get()
+        if not self.validate_date(date):
+            messagebox.showerror("Invalid Date", "Please enter a valid date in YYYYMMDD format.")
+            return
+
         new_quantity = self.new_quantity_entry.get()
         update_data = {"quantity": new_quantity}
         response = requests.put(url=f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}/{date}", json=update_data,
@@ -96,6 +112,10 @@ class PixelaApp:
 
     def delete_pixel(self):
         date = self.delete_date_entry.get()
+        if not self.validate_date(date):
+            messagebox.showerror("Invalid Date", "Please enter a valid date in YYYYMMDD format.")
+            return
+
         response = requests.delete(url=f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}/{date}", headers=HEADERS)
         messagebox.showinfo("Delete Pixel", response.text)
 
