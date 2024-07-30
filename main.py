@@ -96,7 +96,7 @@ class PixelaApp:
         pixel_data = {"date": date, "quantity": quantity}
         response = requests.post(url=f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}", json=pixel_data,
                                  headers=HEADERS)
-        messagebox.showinfo("Add Pixel", response.text)
+        messagebox.showinfo("Add Pixel", "Pixel Added")
 
     def update_pixel(self):
         date = self.update_date_entry.get()
@@ -108,7 +108,7 @@ class PixelaApp:
         update_data = {"quantity": new_quantity}
         response = requests.put(url=f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}/{date}", json=update_data,
                                 headers=HEADERS)
-        messagebox.showinfo("Update Pixel", response.text)
+        messagebox.showinfo("Update Pixel", "Pixel Updated")
 
     def delete_pixel(self):
         date = self.delete_date_entry.get()
@@ -117,7 +117,7 @@ class PixelaApp:
             return
 
         response = requests.delete(url=f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}/{date}", headers=HEADERS)
-        messagebox.showinfo("Delete Pixel", response.text)
+        messagebox.showinfo("Delete Pixel", "Pixel Deleted")
 
 
 # Main
